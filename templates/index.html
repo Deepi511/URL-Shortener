@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>URL Shortener</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e0f7fa);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            padding: 40px 30px;
+            width: 400px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+
+        h2 {
+            font-size: 28px;
+            color: #0077cc;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 12px;
+            border: 2px solid #0077cc;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #00bcd4;
+            box-shadow: 0 0 8px #00bcd4;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px;
+            width: 100%;
+            background-color: #00bcd4;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0097a7;
+        }
+
+        #message {
+            margin-top: 25px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        #message a {
+            color: #009688;
+            text-decoration: none;
+        }
+
+        #message a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔗 MinifyURL</h2>
+        <input type="text" id="longUrl" placeholder="Enter a valid URL">
+        <button id="shortenBtn">Shorten URL</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        document.getElementById("shortenBtn").addEventListener("click", function () {
+            const longUrl = document.getElementById("longUrl").value.trim();
+            const messageDiv = document.getElementById("message");
+            messageDiv.style.color = "red";
+
+            if (!longUrl || !(longUrl.startsWith("http://") || longUrl.startsWith("https://"))) {
+                messageDiv.textContent = "⚠️ Please enter a valid URL (with http:// or https://)";
+                return;
+            }
+
+            fetch('/shorten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'url=' + encodeURIComponent(longUrl)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    messageDiv.textContent = "❌ " + data.error;
+                } else {
+                    messageDiv.style.color = "green";
+                    messageDiv.innerHTML = `✅ Shortened URL: <a href="${data.short_url}" target="_blank">${data.short_url}</a>`;
+                }
+            })
+            .catch(err => {
+                messageDiv.textContent = "💥 Something went wrong! Try again later.";
+            });
+        });
+    </script>
+</body>
+</html>
